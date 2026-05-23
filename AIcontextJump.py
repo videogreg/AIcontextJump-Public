@@ -14,12 +14,16 @@ def process_folder():
     # Setup the Progress Window
     progress_win = tk.Toplevel()
     progress_win.title("Processing...")
-    progress_win.geometry("300x120")
+    progress_win.geometry("400x150")
     
     label = tk.Label(progress_win, text="Aggregating files, please wait...")
     label.pack(pady=10)
     
-    progress = ttk.Progressbar(progress_win, orient="horizontal", length=250, mode="determinate")
+    # New label to show current file name
+    current_file_label = tk.Label(progress_win, text="", wraplength=380, font=("Arial", 8))
+    current_file_label.pack(pady=5)
+    
+    progress = ttk.Progressbar(progress_win, orient="horizontal", length=350, mode="determinate")
     progress.pack(pady=10)
 
     # Calculation for progress
@@ -39,19 +43,24 @@ def process_folder():
             for root_dir, _, files in os.walk(folder_path):
                 for file in files:
                     if file == output_filename: continue
+                    
+                    # Update label with current filename
+                    current_file_label.config(text=f"Processing: {file}")
+                    
                     file_path = os.path.join(root_dir, file)
                     try:
                         outfile.write(f"\n\n--- FILE: {file_path} ---\n\n")
                         with open(file_path, 'r', encoding='utf-8', errors='ignore') as infile:
                             outfile.write(infile.read())
                     except: pass
+                    
                     count += 1
-                    progress["value"] = count # Update bar
+                    progress["value"] = count
         
         progress_win.destroy()
         messagebox.showinfo("Success", f"SUCCESS - File created at: {output_path}")
 
-    # Run in background to keep GUI responsive
+    # Run in background
     threading.Thread(target=run_process, daemon=True).start()
     progress_win.mainloop()
 
